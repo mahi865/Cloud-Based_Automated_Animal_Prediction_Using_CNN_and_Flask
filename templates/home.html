@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Automated Animal Prediction</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+    <header>
+        <h1>Automated Animal Prediction</h1>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Upload an Image</h2>
+            <p>Upload an image to predict whether it is a cat or a dog.</p>
+            <form action="/predictdata" method="post" enctype="multipart/form-data">
+                <label for="file">Choose an image:</label>
+                <input type="file" id="file" name="file" accept="image/*" required>
+                <button type="submit">Upload and Predict</button>
+            </form>
+            {% if results %}
+            <div class="result">
+                <h3>Prediction Result</h3>
+                <p>The uploaded image is predicted to be a: <strong>{{ results }}</strong></p>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Automated Animal Prediction. All rights reserved.</p>
+    </footer>
+</body>
+</html>
