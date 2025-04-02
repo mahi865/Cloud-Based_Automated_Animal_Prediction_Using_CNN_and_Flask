@@ -1,2 +1,6 @@
-keras
 tensorflow
+keras
+numpy
+pandas
+flask
+werkzeug
