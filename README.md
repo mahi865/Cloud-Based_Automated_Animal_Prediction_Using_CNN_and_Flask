@@ -251,3 +251,171 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```
 
 This `README.md` provides comprehensive instructions for setting up, running, and contributing to the project, both locally and using Docker. It also includes details for configuring an EC2 instance as a self-hosted GitHub Actions runner and setting up GitHub secrets.
+
+
+
+
+
+
+############################################################################################################
+
+
+
+
+
+
+
+To set up CI/CD for your project using GitHub Actions, you need to create a GitHub Actions workflow file. This file will define the steps to build, test, and deploy your application.
+
+Here's a step-by-step guide to create a CI/CD pipeline for your project:
+
+### Step 1: Create a GitHub Actions Workflow File
+
+1. In your repository, navigate to the `.github/workflows` directory. If it doesn't exist, create it.
+2. Inside the `.github/workflows` directory, create a new file named `ci-cd.yml`.
+
+### Step 2: Define the Workflow
+
+Add the following content to the `ci-cd.yml` file:
+
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 .
+
+    - name: Run tests
+      run: |
+        source venv/bin/activate
+        python -m unittest discover
+
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+      with:
+        region: ${{ secrets.AWS_REGION }}
+
+    - name: Build, tag, and push Docker image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+        IMAGE_TAG: latest
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to AWS ECS
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ecs-task-def.json
+        service: my-ecs-service
+        cluster: my-ecs-cluster
+        container-name: my-container
+        image: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+```
+
+### Step 3: Define Secrets
+
+You need to set up the following secrets in your GitHub repository:
+
+1. Navigate to your repository on GitHub.
+2. Go to **Settings** > **Secrets and variables** > **Actions**.
+3. Add the following secrets:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_REGION` (e.g., `us-east-1`)
+   - `AWS_ECR_LOGIN_URI` (e.g., `566373416292.dkr.ecr.ap-south-1.amazonaws.com`)
+   - `ECR_REPOSITORY_NAME` (e.g., `simple-app`)
+
+### Step 4: Create ECS Task Definition
+
+Create an `ecs-task-def.json` file in the root of your repository with the following content:
+
+```json
+{
+  "family": "my-ecs-task",
+  "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::<aws_account_id>:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "my-container",
+      "image": "<aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repository>:latest",
+      "essential": true,
+      "memory": 512,
+      "cpu": 256,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "hostPort": 5000
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}
+```
+
+### Step 5: Push Changes
+
+Commit and push the changes to your repository. The GitHub Actions workflow will automatically run on every push to the `main` branch and on every pull request targeting the `main` branch.
+
+### Summary
+
+- **ci-cd.yml**: Defines the GitHub Actions workflow for building, testing, and deploying the application.
+- **Secrets**: Stores sensitive information securely in GitHub.
+- **ecs-task-def.json**: Defines the ECS task for deploying the Docker container.
+
+This should set up a complete CI/CD pipeline for your project using GitHub Actions.

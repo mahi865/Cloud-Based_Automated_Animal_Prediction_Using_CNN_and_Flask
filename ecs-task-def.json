@@ -1,0 +1,25 @@
+{
+    "family": "my-ecs-task",
+    "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::<aws_account_id>:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+      {
+        "name": "my-container",
+        "image": "<aws_account_id>.dkr.ecr.<region>.amazonaws.com/<repository>:latest",
+        "essential": true,
+        "memory": 512,
+        "cpu": 256,
+        "portMappings": [
+          {
+            "containerPort": 5000,
+            "hostPort": 5000
+          }
+        ]
+      }
+    ],
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+  }
