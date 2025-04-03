@@ -3,60 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Automated Animal Prediction</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
-    <script>
-        async function predictImage() {
-            const fileInput = document.getElementById('file');
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/predictdata', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await response.json();
-                document.getElementById('result').innerText = `The uploaded image is predicted to be a: ${result.prediction}`;
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('result').innerText = 'Error in prediction.';
-            }
-        }
-    </script>
+    <title>Automated Animal Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Automated Animal Prediction</h1>
-        <nav>
-            <ul>
-                <li><a href="home.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section>
-            <h2>Upload an Image</h2>
-            <p>Upload an image to predict whether it is a cat or a dog.</p>
-            <form onsubmit="event.preventDefault(); predictImage();" enctype="multipart/form-data">
-                <label for="file">Choose an image:</label>
-                <input type="file" id="file" name="file" accept="image/*" required>
-                <button type="submit">Upload and Predict</button>
-            </form>
-            <div id="result" class="result">
-                <h3>Prediction Result</h3>
-                <p id="prediction">Upload an image to see the prediction result here.</p>
-            </div>
-        </section>
-    </main>
+    <h1>Automated Animal Prediction</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
+    <h2>Upload an Image</h2>
+    <p>Upload an image to predict whether it is a cat or a dog.</p>
+    <form action="{{ url_for('predict_datapoint') }}" method="post" enctype="multipart/form-data">
+        <label for="file">Choose an image:</label>
+        <input type="file" id="file" name="file">
+        <input type="submit" value="Upload and Predict">
+    </form>
+    
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    
     <footer>
-        <p>&copy; 2025 Automated Animal Prediction. All rights reserved.</p>
+        <p>© 2025 Automated Animal Prediction. All rights reserved.</p>
     </footer>
 </body>
 </html>
