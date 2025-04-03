@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - Automated Animal Prediction</title>
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <script>
+        async function predictImage() {
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/predictdata', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerText = `The uploaded image is predicted to be a: ${result.prediction}`;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerText = 'Error in prediction.';
+            }
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -21,17 +44,15 @@
         <section>
             <h2>Upload an Image</h2>
             <p>Upload an image to predict whether it is a cat or a dog.</p>
-            <form action="/predictdata" method="post" enctype="multipart/form-data">
+            <form onsubmit="event.preventDefault(); predictImage();" enctype="multipart/form-data">
                 <label for="file">Choose an image:</label>
                 <input type="file" id="file" name="file" accept="image/*" required>
                 <button type="submit">Upload and Predict</button>
             </form>
-            {% if results %}
-            <div class="result">
+            <div id="result" class="result">
                 <h3>Prediction Result</h3>
-                <p>The uploaded image is predicted to be a: <strong>{{ results }}</strong></p>
+                <p id="prediction">Upload an image to see the prediction result here.</p>
             </div>
-            {% endif %}
         </section>
     </main>
     <footer>
