@@ -2,14 +2,10 @@ import sys
 import os
 import numpy as np
 import pandas as pd
-from PIL import Image
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model  # Import the correct function for loading the model
 from src.exception import CustomException
 from src.utils import load_object
-
-
-
 
 class PredictPipeline:
     def __init__(self):

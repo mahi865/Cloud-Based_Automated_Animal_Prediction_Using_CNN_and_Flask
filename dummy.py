@@ -1,4 +1,6 @@
 import tensorflow as tf
+import pickle
+from sklearn.preprocessing import StandardScaler
 import os
 
 # Ensure the artifacts directory exists
@@ -17,25 +19,20 @@ model = tf.keras.models.Sequential([
 ])
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-# Assuming you have training data loaded in training_set and test_set
-# model.fit(training_set, epochs=25, validation_data=test_set)
+# Dummy training data
+import numpy as np
+X_train = np.random.rand(100, 64, 64, 3)
+y_train = np.random.randint(2, size=(100, 1))
+
+# Train the model with dummy data (for demonstration purposes)
+model.fit(X_train, y_train, epochs=1)
 
 # Save the model to the artifacts directory
 model.save('artifacts/model.h5')
 
-
-import pickle
-from sklearn.preprocessing import StandardScaler
-import os
-
-# Ensure the artifacts directory exists
-if not os.path.exists('artifacts'):
-    os.makedirs('artifacts')
-
-# Create your preprocessor
+# Create and fit the preprocessor
 preprocessor = StandardScaler()
-# Assuming you have training data loaded in training_data
-# preprocessor.fit(training_data)
+preprocessor.fit(X_train.reshape(100, -1))  # Flatten the images for the scaler
 
 # Save the preprocessor to the artifacts directory
 with open('artifacts/preprocessor.pkl', 'wb') as file:

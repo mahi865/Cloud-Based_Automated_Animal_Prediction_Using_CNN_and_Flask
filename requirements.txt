@@ -4,3 +4,5 @@ numpy
 pandas
 flask
 werkzeug
+scikit-learn
+tensorflow scikit-learn

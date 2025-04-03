@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for
 import os
 from werkzeug.utils import secure_filename
 from src.pipeline.predict_pipeline import CustomData, PredictPipeline
+from src.exception import CustomException  # Ensure this import is here
 
 application = Flask(__name__)
 
@@ -39,11 +40,10 @@ def predict_datapoint():
             file.save(file_path)
             
             # Prepare the data for prediction
-            data = CustomData(image_path=file_path)
             predict_pipeline = PredictPipeline()
             results = predict_pipeline.predict(file_path)
             
             return render_template('home.html', results=results)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000) 
+    app.run(host="0.0.0.0", port=5000)
