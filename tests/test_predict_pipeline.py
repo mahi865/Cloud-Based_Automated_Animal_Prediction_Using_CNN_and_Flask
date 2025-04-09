@@ -1,2 +1,8 @@
-def test_example():
-    assert 1 + 1 == 2
+import pytest
+from src.pipeline.predict_pipeline import PredictPipeline
+
+def test_predict_pipeline():
+    pipeline = PredictPipeline()
+    # Replace 'path_to_test_image.jpg' with the path to a sample test image
+    result = pipeline.predict("dataset\\test_set\\dogs\\dog.4015.jpg")
+    assert result in ["cat", "dog"], "Prediction should be either 'cat' or 'dog'"
