@@ -1,9 +1,29 @@
+# TensorFlow for building and running the model
 tensorflow
-keras
-numpy
-pandas
+
+# Scikit-learn for preprocessing and utility functions
+scikit-learn
+
+# Flask for the web application
 flask
+
+# Werkzeug for secure file handling in Flask
 werkzeug
-scikit-learn
-tensorflow 
-scikit-learn
+
+# Pytest for testing the application
+pytest
+
+# NumPy for numerical computations
+numpy
+
+# Pandas for data manipulation (if needed)
+pandas
+
+# Matplotlib for plotting (if used in the notebook or visualizations)
+matplotlib
+
+# Jupyter for running notebook files
+jupyter
+
+# Pickle5 for handling pickle serialization (if used)
+pickle5
