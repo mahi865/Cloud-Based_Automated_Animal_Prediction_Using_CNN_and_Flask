@@ -419,3 +419,95 @@ Commit and push the changes to your repository. The GitHub Actions workflow will
 - **ecs-task-def.json**: Defines the ECS task for deploying the Docker container.
 
 This should set up a complete CI/CD pipeline for your project using GitHub Actions.
+
+
+#########################################################################################################################33
+
+Updated Information
+
+Based on the files and information retrieved from your repository, here is an analysis of the project and tools used, followed by a proposed architecture diagram.
+
+---
+
+### **Project Overview**
+The "Automated Animal Prediction" project uses a Convolutional Neural Network (CNN) to predict whether an image is of a cat or a dog. It includes:
+- **Flask Web Application:** For interacting with users where images can be uploaded for prediction.
+- **Machine Learning Model:** A CNN for binary classification (cat vs. dog), trained using TensorFlow/Keras.
+- **AWS Infrastructure:** Terraform scripts for provisioning AWS resources, including EC2 instances.
+- **Data Preprocessing:** Tools and scripts for handling datasets and preparing input for the model.
+- **Docker Integration:** Docker setup for containerizing and deploying the application.
+- **GitHub Actions:** CI/CD pipeline for automating the build, test, and deployment process.
+
+---
+
+### **Architecture Diagram**
+
+The architecture can be structured into the following key layers:
+
+```plaintext
+               +-----------------------------------+
+               |       User Interface (Web)       |
+               |   (Flask Application in EC2)     |
+               +-----------------------------------+
+                               |
+                               v
+               +-----------------------------------+
+               | Machine Learning Model (CNN)      |
+               |  (TensorFlow/Keras, Preprocessor) |
+               +-----------------------------------+
+                               |
+                               v
+               +-----------------------------------+
+               |   Data Preprocessing Layer        |
+               | (Training and Testing datasets)   |
+               +-----------------------------------+
+                               |
+                               v
+               +-----------------------------------+
+               |          AWS Infrastructure       |
+               |   (Terraform: EC2, S3, IAM, etc.) |
+               +-----------------------------------+
+                               |
+                               v
+               +-----------------------------------+
+               |         CI/CD Pipeline            |
+               |  (GitHub Actions, Docker, ECS)    |
+               +-----------------------------------+
+```
+
+---
+
+### **Components Explained**
+
+1. **User Interface (Web)**:
+   - Built with Flask (`app.py`).
+   - Provides endpoints for uploading images and displaying predictions.
+   - Renders templates such as `index.html` and handles file uploads.
+
+2. **Machine Learning Model**:
+   - A CNN, defined and trained via TensorFlow/Keras (`train_pipeline.py`).
+   - Handles predictions through the `PredictPipeline` class in `predict_pipeline.py`.
+   - Preprocessor (e.g., StandardScaler) is used for transforming input data.
+
+3. **Data Preprocessing**:
+   - Scripts like `training_cnn.py` and `making_single_prediction.py` handle training and prediction tasks.
+   - Preprocessing includes rescaling images and data augmentation.
+
+4. **AWS Infrastructure**:
+   - Terraform is used to provision resources:
+     - `main.tf`: Defines EC2 instances.
+     - `variables.tf` and `outputs.tf`: Handle configuration.
+   - Resources like S3 buckets can store datasets and model artifacts.
+
+5. **CI/CD Pipeline**:
+   - GitHub Actions workflow (`ci-cd.yml`) automates build, test, and deployment tasks.
+   - Docker is used for containerizing the application.
+   - ECS (Elastic Container Service) can be used for deploying Docker containers.
+
+---
+
+### **Next Steps**
+1. **Validation**: Ensure all Terraform configurations are deployed and that the Flask app is running on the provisioned EC2 instance.
+2. **Enhancements**: Use S3 for storing datasets and model artifacts to ensure scalability.
+3. **Monitoring**: Add logging and monitoring for the web app and AWS resources.
+4. **Testing**: Validate the CI/CD pipeline for automated updates on code push.
