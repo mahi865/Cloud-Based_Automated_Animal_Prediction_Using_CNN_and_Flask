@@ -74,7 +74,7 @@ X_train_flattened = X_train.reshape(X_train.shape[0], -1)  # Flatten images
 preprocessor = StandardScaler()
 preprocessor.fit(X_train_flattened)
 
-# Save the preprocessor to a pickle file
+# Save the preprocessor to a .pickle file
 with open("artifacts/preprocessor.pkl", "wb") as file:
     pickle.dump(preprocessor, file)
 
