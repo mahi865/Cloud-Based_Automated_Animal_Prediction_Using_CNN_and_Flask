@@ -1,34 +1,94 @@
-name: Python Tests
+name: CI/CD Pipeline for Flask App Deployment
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
+env:
+  AWS_REGION: us-west-2
+  TERRAFORM_VERSION: 1.4.6
+  DOCKER_IMAGE: your-dockerhub-username/flask-app:latest
 
 jobs:
-  test:
+  terraform:
+    name: Infrastructure Deployment
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository code
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    # Set up Python
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.8  # Adjust based on your project requirements
+      # Step 2: Set up Terraform
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-    # Install dependencies
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      # Step 3: Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
 
-    # Run Python tests with pytest
-    - name: Run Python tests
-      run: pytest tests/ -s
+      # Step 4: Apply Terraform (Provision EC2 and Networking)
+      - name: Terraform Apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: terraform apply -auto-approve
+
+      # Step 5: Output Public IP
+      - name: Output EC2 Public IP
+        id: public_ip
+        run: |
+          terraform output -json > output.json
+          echo "Public IP: $(jq -r '.instance_public_ip.value' output.json)"
+        shell: bash
+
+  docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: terraform
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 3: Build the Docker Image
+      - name: Build Docker Image
+        run: docker build -t ${{ env.DOCKER_IMAGE }} .
+
+      # Step 4: Push Docker Image to Docker Hub
+      - name: Push Docker Image
+        run: docker push ${{ env.DOCKER_IMAGE }}
+
+  deploy:
+    name: Deploy Flask App
+    runs-on: ubuntu-latest
+    needs: docker
+
+    steps:
+      # Step 1: Retrieve Terraform Outputs
+      - name: Retrieve EC2 Public IP
+        run: |
+          echo "Public IP: $(jq -r '.instance_public_ip.value' output.json)"
+        shell: bash
+
+      # Step 2: Deploy Flask App to EC2 Instance
+      - name: Deploy App
+        env:
+          EC2_PUBLIC_IP: ${{ steps.public_ip.outputs.EC2_PUBLIC_IP }}
+          DOCKER_IMAGE: ${{ env.DOCKER_IMAGE }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i your-key.pem ec2-user@$EC2_PUBLIC_IP << EOF
+          sudo docker pull $DOCKER_IMAGE
+          sudo docker run -d -p 5000:5000 $DOCKER_IMAGE
+          EOF
