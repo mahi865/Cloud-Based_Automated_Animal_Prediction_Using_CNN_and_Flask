@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 # Security Group
 resource "aws_security_group" "web_sg" {
   name        = "web-sg"
